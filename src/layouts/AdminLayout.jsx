@@ -46,8 +46,13 @@ const AdminLayout = () => {
     },
     {
       icon: <CreditCard size={20} />,
-      label: "Manage Services",
+      label: "Manage Data Services",
       path: "/admin/services",
+    },
+    {
+      icon: <CreditCard size={20} />,
+      label: "Manage Electricity Providers",
+      path: "/admin/electricity",
     },
     {
       icon: <Settings size={20} />,

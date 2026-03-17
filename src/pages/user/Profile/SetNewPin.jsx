@@ -3,14 +3,27 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "../../../api/api";
 
 const SetNewPin = ({ user, onClose, fetchUser }) => {
-  const [newPin, setNewPin] = useState(0);
-  const [confirmPin, setConfirmPin] = useState(0);
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  const hasPin = !!user.transaction_pin;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (newPin.length !== 4) {
+      setMessage("PIN must be exactly 4 digits ❌");
+      return;
+    }
+
+    if (newPin !== confirmPin) {
+      setMessage("Pins do not match ❌");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
@@ -19,14 +32,19 @@ const SetNewPin = ({ user, onClose, fetchUser }) => {
         pin: newPin,
         pin_confirmation: confirmPin,
       });
-      setMessage("Pin Set successfully ✅");
+
+      setMessage(
+        hasPin ? "Pin changed successfully ✅" : "Pin set successfully ✅",
+      );
+
+      fetchUser();
+
       setTimeout(() => {
         onClose();
-      }, 2000);
+      }, 1500);
     } catch (err) {
-      setMessage(err.response?.data?.message || "Failed to update name ❌");
+      setMessage(err.response?.data?.message || "Failed to update pin ❌");
     }
-    fetchUser();
 
     setLoading(false);
   };
@@ -43,7 +61,9 @@ const SetNewPin = ({ user, onClose, fetchUser }) => {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 50, opacity: 0 }}>
-          <h3 className='text-xl font-semibold mb-4'>Update Name</h3>
+          <h3 className='text-xl font-semibold mb-4'>
+            {hasPin ? "Change Transaction Pin" : "Set Transaction Pin"}
+          </h3>
 
           {message && (
             <div className='bg-gray-100 p-2 rounded mb-3 text-sm'>
@@ -53,21 +73,25 @@ const SetNewPin = ({ user, onClose, fetchUser }) => {
 
           <form onSubmit={handleSubmit} className='space-y-4'>
             <input
-              type='number'
-              placeholder='New Pin'
+              type='password'
+              inputMode='numeric'
+              maxLength={4}
+              placeholder='Enter 4-digit PIN'
               value={newPin}
-              onChange={(e) => setNewPin(e.target.value)}
+              onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
               required
-              className='w-full border p-3 rounded-lg'
+              className='w-full border p-3 rounded-lg text-center tracking-widest'
             />
 
             <input
-              type='number'
-              placeholder='Confirm Pin'
+              type='password'
+              inputMode='numeric'
+              maxLength={4}
+              placeholder='Confirm PIN'
               value={confirmPin}
-              onChange={(e) => setConfirmPin(e.target.value)}
+              onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
               required
-              className='w-full border p-3 rounded-lg'
+              className='w-full border p-3 rounded-lg text-center tracking-widest'
             />
 
             <div className='flex gap-3'>
@@ -82,7 +106,7 @@ const SetNewPin = ({ user, onClose, fetchUser }) => {
                 type='submit'
                 disabled={loading}
                 className='w-1/2 bg-blue-600 text-white py-2 rounded-lg'>
-                {loading ? "Processing..." : "Update Name"}
+                {loading ? "Processing..." : hasPin ? "Change Pin" : "Set Pin"}
               </button>
             </div>
           </form>

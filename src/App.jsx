@@ -16,6 +16,9 @@ import TransactionsPage from "./pages/user/TransactionsPage";
 import Profile from "./pages/user/Profile";
 import AdminDataPlans from "./pages/admin/pages/AdminDataPlans";
 
+import ElectricityAdmin from "./pages/admin/ElectricityAdmin";
+import BuyElectricity from "./pages/user/Electricity";
+
 const App = () => {
   return (
     <Router>
@@ -32,6 +35,7 @@ const App = () => {
           <Route path='buy-data' element={<BuyData />} />
           <Route path='history' element={<TransactionsPage />} />
           <Route path='profile' element={<Profile />} />
+          <Route path='electricity' element={<BuyElectricity />} />
         </Route>
 
         {/* Admin Dashboard */}
@@ -41,6 +45,7 @@ const App = () => {
           <Route path='transactions' element={<ManageTransactions />} />
           <Route path='users/:id' element={<UserDetails />} />
           <Route path='services' element={<AdminDataPlans />} />
+          <Route path='electricity' element={<ElectricityAdmin />} />
         </Route>
       </Routes>
     </Router>
