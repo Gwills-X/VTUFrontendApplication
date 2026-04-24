@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../api/api";
+import { Zap, Smartphone, ShieldCheck, Info } from "lucide-react";
 
 import MtnLogo from "../../assets/logos/MtnLogo";
 import AirtelLogo from "../../assets/logos/AirtelLogo";
@@ -14,28 +15,32 @@ const networks = [
     name: "MTN",
     value: "mtn",
     network_code: 1,
-    color: "bg-yellow-400",
+    color: "bg-[#FFCC00]", // True MTN Yellow
+    textColor: "text-black",
     logo: <MtnLogo />,
   },
   {
     name: "Airtel",
     value: "airtel",
     network_code: 2,
-    color: "bg-red-500",
+    color: "bg-[#E30613]", // True Airtel Red
+    textColor: "text-white",
     logo: <AirtelLogo />,
   },
   {
     name: "Glo",
     value: "glo",
     network_code: 3,
-    color: "bg-green-600",
+    color: "bg-[#28A745]", // True Glo Green
+    textColor: "text-white",
     logo: <GloLogo />,
   },
   {
     name: "9mobile",
     value: "9mobile",
     network_code: 4,
-    color: "bg-green-400",
+    color: "bg-[#003831]", // True 9mobile Dark Green
+    textColor: "text-white",
     logo: <NineMobileLogo />,
   },
 ];
@@ -60,7 +65,6 @@ const BuyAirtime = ({ onSuccess }) => {
   const isValidAmount = Number(form.amount) >= 50;
   const isValid = selectedNetwork && isValidPhone && isValidAmount && !loading;
 
-  // Countdown for lock
   useEffect(() => {
     if (lockCountdown > 0) {
       const timer = setInterval(() => {
@@ -70,7 +74,6 @@ const BuyAirtime = ({ onSuccess }) => {
     }
   }, [lockCountdown]);
 
-  // Submit Airtime form → show PIN modal
   const handleSubmit = (e) => {
     e.preventDefault();
     setError(null);
@@ -101,7 +104,6 @@ const BuyAirtime = ({ onSuccess }) => {
     }
   };
 
-  // Handle PIN confirmation
   const handlePinConfirm = async () => {
     const finalPin = pin.join("");
     if (finalPin.length !== 4) return;
@@ -114,8 +116,7 @@ const BuyAirtime = ({ onSuccess }) => {
         ...pendingTransaction,
         pin: finalPin,
       });
-      console.log(res.data.provider_response.message);
-      // PIN correct → show success message in Airtime modal
+
       setMessage(res.data.message || "Airtime purchase successful!");
       setShowPinModal(false);
       setSelectedNetwork(
@@ -124,7 +125,6 @@ const BuyAirtime = ({ onSuccess }) => {
 
       if (onSuccess) onSuccess(res.data.balance);
 
-      // Auto-close Airtime modal after 3s
       setTimeout(() => {
         setSelectedNetwork(null);
         setMessage(null);
@@ -135,8 +135,6 @@ const BuyAirtime = ({ onSuccess }) => {
     } catch (err) {
       const apiMessage =
         err.response?.data?.message || "Transaction failed. Please try again.";
-
-      // Invalid PIN → stay in PIN modal
       if (apiMessage === "Invalid transaction PIN.") {
         setError(apiMessage);
         setShake(true);
@@ -146,8 +144,6 @@ const BuyAirtime = ({ onSuccess }) => {
         setAttemptsLeft((prev) => Math.max(prev - 1, 0));
         return;
       }
-
-      // Other errors → close PIN modal and show Airtime modal
       setShowPinModal(false);
       setSelectedNetwork(
         networks.find((n) => n.network_code === pendingTransaction.network_id),
@@ -160,28 +156,67 @@ const BuyAirtime = ({ onSuccess }) => {
   };
 
   return (
-    <div className='space-y-6'>
-      <h2 className='text-2xl font-semibold'>Buy Airtime</h2>
+    <div className='max-w-4xl mx-auto'>
+      {/* HEADER SECTION */}
+      <div className='mb-10'>
+        <div className='flex items-center gap-3 mb-2'>
+          <div className='p-2 bg-blue-100 text-blue-600 rounded-lg'>
+            <Smartphone size={20} />
+          </div>
+          <h2 className='text-2xl font-black text-slate-900 tracking-tight'>
+            Buy Airtime
+          </h2>
+        </div>
+        <p className='text-slate-500 font-medium'>
+          Select a network provider to begin your recharge.
+        </p>
+      </div>
 
       {/* NETWORK GRID */}
-      <div className='grid grid-cols-2 gap-4'>
+      <div className='grid grid-cols-2 md:grid-cols-4 gap-6'>
         {networks.map((net) => (
           <motion.div
             key={net.value}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ y: -5, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setSelectedNetwork(net)}
-            className={`${net.color} text-white rounded-2xl p-6 cursor-pointer shadow-lg flex flex-col items-center ${
-              selectedNetwork?.value === net.value ? "ring-4 ring-black" : ""
-            }`}>
-            <div className='w-20 h-20 flex items-center justify-center'>
-              {net.logo}
+            className={`relative group rounded-[2.5rem] p-8 cursor-pointer overflow-hidden transition-all duration-300 ${
+              selectedNetwork?.value === net.value
+                ? "ring-4 ring-offset-4 ring-blue-600"
+                : "hover:shadow-2xl hover:shadow-slate-200"
+            } ${net.color}`}>
+            {/* Glossy Overlay */}
+            <div className='absolute inset-0 bg-white/10 group-hover:bg-transparent transition-colors' />
+
+            <div className='relative z-10 flex flex-col items-center'>
+              <div className='w-20 h-20 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center p-4 shadow-inner'>
+                {net.logo}
+              </div>
+              <p
+                className={`mt-4 font-black text-sm uppercase tracking-widest ${net.textColor}`}>
+                {net.name}
+              </p>
             </div>
-            <p className='mt-3 font-semibold'>{net.name}</p>
+
+            {/* Selection Indicator */}
+            {selectedNetwork?.value === net.value && (
+              <div className='absolute top-4 right-4 bg-white text-blue-600 p-1 rounded-full shadow-lg'>
+                <Zap size={14} fill='currentColor' />
+              </div>
+            )}
           </motion.div>
         ))}
       </div>
 
-      {/* AIRTIME MODAL */}
+      {/* FOOTER INFO */}
+      <div className='mt-8 flex items-center gap-2 text-slate-400 bg-slate-50 p-4 rounded-2xl border border-slate-100'>
+        <Info size={16} />
+        <p className='text-xs font-bold uppercase tracking-wide'>
+          Instant delivery to all networks • 24/7 Support
+        </p>
+      </div>
+
+      {/* MODALS */}
       <AnimatePresence>
         {selectedNetwork && !(error === "Invalid transaction PIN.") && (
           <BuyAirtimeModal
@@ -195,10 +230,7 @@ const BuyAirtime = ({ onSuccess }) => {
             isValid={isValid}
           />
         )}
-      </AnimatePresence>
 
-      {/* PIN MODAL */}
-      <AnimatePresence>
         {showPinModal && (
           <TransactionPinModal
             shake={shake}

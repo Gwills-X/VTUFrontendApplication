@@ -1,5 +1,15 @@
 import { useState } from "react";
 import api from "../../../api/api";
+import {
+  X,
+  Wifi,
+  ShieldCheck,
+  Tag,
+  Calendar,
+  CreditCard,
+  Activity,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function CreateDataPlanModal({
   isOpen,
@@ -8,13 +18,8 @@ export default function CreateDataPlanModal({
   networkCategories,
 }) {
   const networks = ["mtn", "airtel", "glo", "9mobile"];
-  // Mapping networks to their specific codes
-  const networkMap = {
-    mtn: 1,
-    airtel: 2,
-    glo: 3,
-    "9mobile": 4,
-  };
+  const networkMap = { mtn: 1, airtel: 2, glo: 3, "9mobile": 4 };
+
   const [form, setForm] = useState({
     network: "",
     network_code: "",
@@ -27,151 +32,229 @@ export default function CreateDataPlanModal({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     if (name === "network") {
-      // If network changes, automatically update the network_code
       setForm({
         ...form,
         network: value,
-        network_code: networkMap[value] || "", // Sets code based on map, or empty if none
+        network_code: networkMap[value] || "",
       });
     } else {
-      // Standard handling for other fields
-      setForm({
-        ...form,
-        [name]: value,
-      });
+      setForm({ ...form, [name]: value });
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    await api.post("/admin/dataplans", form);
-
-    refreshPlans();
-    onClose();
-
-    setForm({
-      network: "",
-      network_code: "",
-      plan_id: "",
-      data: "",
-      price: "",
-      validity: "",
-      plan_category_name: "",
-    });
+    try {
+      await api.post("/admin/dataplans", form);
+      refreshPlans();
+      onClose();
+      setForm({
+        network: "",
+        network_code: "",
+        plan_id: "",
+        data: "",
+        price: "",
+        validity: "",
+        plan_category_name: "",
+      });
+    } catch (err) {
+      console.error("Failed to create plan", err);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50'>
-      <div className='bg-white rounded-lg shadow-lg w-full max-w-md p-6'>
-        <h2 className='text-xl font-bold mb-4'>Create Data Plan</h2>
+    <div className='fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4'>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className='bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100'>
+        {/* MODAL HEADER */}
+        <div className='px-8 py-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center'>
+          <div>
+            <h2 className='text-2xl font-black text-slate-900 tracking-tight'>
+              New Data Plan
+            </h2>
+            <p className='text-slate-500 text-xs font-bold uppercase tracking-widest mt-1'>
+              Configure Network Bundle
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className='p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-400'>
+            <X size={20} />
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit} className='space-y-3'>
-          {/* Network */}
-          <select
-            name='network'
-            value={form.network}
-            onChange={handleChange}
-            required
-            className='w-full border px-3 py-2 rounded'>
-            <option value=''>Select Network</option>
-            {networks.map((n) => (
-              <option key={n} value={n}>
-                {n.toUpperCase()}
-              </option>
-            ))}
-          </select>
+        <form onSubmit={handleSubmit} className='p-8 space-y-5'>
+          {/* NETWORK SELECTION GROUP */}
+          <div className='grid grid-cols-2 gap-4'>
+            <div className='space-y-1.5'>
+              <label className='text-[10px] font-black text-slate-400 uppercase ml-1'>
+                Network
+              </label>
+              <div className='relative'>
+                <Wifi
+                  className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-300'
+                  size={16}
+                />
+                <select
+                  name='network'
+                  value={form.network}
+                  onChange={handleChange}
+                  required
+                  className='w-full bg-slate-50 border-none focus:ring-2 focus:ring-blue-500/20 p-3 pl-11 rounded-xl text-sm font-bold appearance-none text-slate-700'>
+                  <option value=''>Select...</option>
+                  {networks.map((n) => (
+                    <option key={n} value={n}>
+                      {n.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-          {/* Network Code */}
-          <input
-            type='number'
-            disabled
-            name='network_code'
-            placeholder='Network Code'
-            value={form.network_code}
-            onChange={handleChange}
-            required
-            className='w-full border px-3 py-2 rounded'
-          />
+            <div className='space-y-1.5'>
+              <label className='text-[10px] font-black text-slate-400 uppercase ml-1'>
+                Net Code
+              </label>
+              <div className='relative'>
+                <ShieldCheck
+                  className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-300'
+                  size={16}
+                />
+                <input
+                  type='number'
+                  disabled
+                  value={form.network_code}
+                  className='w-full bg-slate-100 border-none p-3 pl-11 rounded-xl text-sm font-black text-blue-600'
+                />
+              </div>
+            </div>
+          </div>
 
-          {/* Plan ID */}
-          <input
-            type='number'
-            name='plan_id'
-            placeholder='Plan ID'
-            value={form.plan_id}
-            onChange={handleChange}
-            required
-            className='w-full border px-3 py-2 rounded'
-          />
+          {/* PLAN DETAILS GROUP */}
+          <div className='space-y-1.5'>
+            <label className='text-[10px] font-black text-slate-400 uppercase ml-1'>
+              Technical ID & Allowance
+            </label>
+            <div className='grid grid-cols-2 gap-4'>
+              <div className='relative'>
+                <Activity
+                  className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-300'
+                  size={16}
+                />
+                <input
+                  type='number'
+                  name='plan_id'
+                  placeholder='Plan ID'
+                  value={form.plan_id}
+                  onChange={handleChange}
+                  required
+                  className='w-full bg-slate-50 border-none focus:ring-2 focus:ring-blue-500/20 p-3 pl-11 rounded-xl text-sm font-bold'
+                />
+              </div>
+              <div className='relative'>
+                <Tag
+                  className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-300'
+                  size={16}
+                />
+                <input
+                  type='text'
+                  name='data'
+                  placeholder='Data (e.g. 5GB)'
+                  value={form.data}
+                  onChange={handleChange}
+                  required
+                  className='w-full bg-slate-50 border-none focus:ring-2 focus:ring-blue-500/20 p-3 pl-11 rounded-xl text-sm font-bold'
+                />
+              </div>
+            </div>
+          </div>
 
-          {/* Data */}
-          <input
-            type='text'
-            name='data'
-            placeholder='Data (e.g 2GB)'
-            value={form.data}
-            onChange={handleChange}
-            required
-            className='w-full border px-3 py-2 rounded'
-          />
+          {/* PRICING & VALIDITY */}
+          <div className='grid grid-cols-2 gap-4'>
+            <div className='space-y-1.5'>
+              <label className='text-[10px] font-black text-slate-400 uppercase ml-1'>
+                Price (₦)
+              </label>
+              <div className='relative'>
+                <CreditCard
+                  className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-300'
+                  size={16}
+                />
+                <input
+                  type='number'
+                  name='price'
+                  placeholder='0.00'
+                  value={form.price}
+                  onChange={handleChange}
+                  required
+                  className='w-full bg-slate-50 border-none focus:ring-2 focus:ring-blue-500/20 p-3 pl-11 rounded-xl text-sm font-bold'
+                />
+              </div>
+            </div>
 
-          {/* Price */}
-          <input
-            type='number'
-            name='price'
-            placeholder='Price'
-            value={form.price}
-            onChange={handleChange}
-            required
-            className='w-full border px-3 py-2 rounded'
-          />
+            <div className='space-y-1.5'>
+              <label className='text-[10px] font-black text-slate-400 uppercase ml-1'>
+                Validity
+              </label>
+              <div className='relative'>
+                <Calendar
+                  className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-300'
+                  size={16}
+                />
+                <input
+                  type='text'
+                  name='validity'
+                  placeholder='e.g. 30 Days'
+                  value={form.validity}
+                  onChange={handleChange}
+                  required
+                  className='w-full bg-slate-50 border-none focus:ring-2 focus:ring-blue-500/20 p-3 pl-11 rounded-xl text-sm font-bold'
+                />
+              </div>
+            </div>
+          </div>
 
-          {/* Validity */}
-          <input
-            type='text'
-            name='validity'
-            placeholder='Validity (e.g 30 Days)'
-            value={form.validity}
-            onChange={handleChange}
-            required
-            className='w-full border px-3 py-2 rounded'
-          />
+          {/* CATEGORY */}
+          <div className='space-y-1.5 pb-4'>
+            <label className='text-[10px] font-black text-slate-400 uppercase ml-1'>
+              Bundle Category
+            </label>
+            <select
+              name='plan_category_name'
+              value={form.plan_category_name}
+              onChange={handleChange}
+              required
+              className='w-full bg-slate-50 border-none focus:ring-2 focus:ring-blue-500/20 p-3.5 rounded-xl text-sm font-bold text-slate-700'>
+              <option value=''>Select Classification</option>
+              {networkCategories.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          {/* Category Name */}
-          <select
-            type='text'
-            name='plan_category_name'
-            placeholder='Category (e.g Data Share, Gifting, Awoof)'
-            value={form.plan_category_name}
-            onChange={handleChange}
-            required
-            className='w-full border px-3 py-2 rounded'>
-            <option value=''>Category (e.g Data Share, Gifting, Awoof)</option>
-            {networkCategories.map((cat) => (
-              <option key={cat.id}>{cat.name}</option>
-            ))}
-          </select>
-
-          <div className='flex justify-end gap-2 mt-4'>
+          {/* ACTIONS */}
+          <div className='flex gap-3 pt-4'>
             <button
               type='button'
               onClick={onClose}
-              className='px-4 py-2 bg-gray-300 rounded hover:bg-gray-400'>
-              Cancel
+              className='flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold hover:bg-slate-200 transition-all text-sm'>
+              Discard
             </button>
             <button
               type='submit'
-              className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'>
-              Create
+              className='flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-black text-sm hover:bg-blue-700 transition-all shadow-xl shadow-blue-100'>
+              Create Data Plan
             </button>
           </div>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }
