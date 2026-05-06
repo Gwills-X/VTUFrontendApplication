@@ -10,10 +10,11 @@ import {
   ListOrdered,
   LogOut,
   Menu,
-  X,
   Zap,
   Activity,
   ChevronRight,
+  Bell,
+  Search,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setLogout } from "../redux/authSlice";
@@ -22,10 +23,9 @@ const AdminLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation(); // Hook to track active path
+  const location = useLocation();
   const { user, token } = useSelector((state) => state.auth);
 
-  // Auth Guard
   if (!token || !user?.is_admin) {
     navigate("/login");
   }
@@ -37,31 +37,33 @@ const AdminLayout = () => {
 
   const adminMenu = [
     { icon: <BarChart3 size={18} />, label: "Overview", path: "/admin" },
-    { icon: <Users size={18} />, label: "Manage Users", path: "/admin/users" },
+    { icon: <Users size={18} />, label: "Users", path: "/admin/users" },
     {
       icon: <ListOrdered size={18} />,
-      label: "All Transactions",
+      label: "Cable TV",
+      path: "/admin/cable-tv",
+    },
+    {
+      icon: <ListOrdered size={18} />,
+      label: "Transactions",
       path: "/admin/transactions",
     },
-    {
-      icon: <Zap size={18} />,
-      label: "Data Services",
-      path: "/admin/services",
-    },
+    { icon: <Zap size={18} />, label: "Data", path: "/admin/services" },
     {
       icon: <CreditCard size={18} />,
-      label: "Electricity Providers",
+      label: "Electricity",
       path: "/admin/electricity",
     },
     {
       icon: <Settings size={18} />,
-      label: "API Settings",
+      label: "Settings",
       path: "/admin/settings",
     },
   ];
 
   return (
-    <div className='min-h-screen bg-[#F8FAFC] flex font-sans text-slate-900'>
+    // Added overflow-hidden to prevent the whole body from double-scrolling
+    <div className='h-screen bg-[#F1F5F9] flex overflow-hidden font-sans text-slate-900'>
       {/* MOBILE SIDEBAR OVERLAY */}
       <AnimatePresence>
         {isSidebarOpen && (
@@ -70,33 +72,31 @@ const AdminLayout = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSidebarOpen(false)}
-            className='fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] md:hidden'
+            className='fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[60] md:hidden'
           />
         )}
       </AnimatePresence>
 
       {/* SIDEBAR */}
       <aside
-        className={`fixed inset-y-0 left-0 z-[70] w-72 bg-[#0F172A] text-white transition-all duration-300 transform 
-        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 shadow-2xl`}>
-        {/* LOGO AREA */}
-        <div className='h-20 flex items-center px-8 border-b border-slate-800/50'>
-          <div className='flex items-center gap-3'>
-            <div className='bg-blue-500 p-2 rounded-xl shadow-lg shadow-blue-500/20'>
-              <ShieldCheck size={24} className='text-white' />
+        className={`fixed inset-y-0 left-0 z-[70] w-64 bg-[#0F172A] text-white transition-all duration-300 ease-in-out transform 
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 border-r border-white/5 shadow-2xl`}>
+        <div className='h-20 flex items-center px-6'>
+          <div className='flex items-center gap-2 group cursor-pointer'>
+            <div className='bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-500/40'>
+              <ShieldCheck size={22} className='text-white' />
             </div>
-            <span className='text-lg font-black tracking-tight uppercase'>
-              Core<span className='text-blue-400'>Admin</span>
+            <span className='text-lg font-black tracking-tighter uppercase italic'>
+              Core<span className='text-blue-500 not-italic'>Admin</span>
             </span>
           </div>
         </div>
 
-        {/* NAVIGATION */}
-        <nav className='mt-8 px-4 space-y-1'>
-          <p className='px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4'>
-            Main Menu
+        {/* NAVIGATION - Using overflow-y-auto for long menus */}
+        <nav className='mt-2 px-3 space-y-1 overflow-y-auto h-[calc(100vh-160px)]'>
+          <p className='px-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4'>
+            Menu
           </p>
-
           {adminMenu.map((item, i) => {
             const isActive = location.pathname === item.path;
             return (
@@ -104,99 +104,101 @@ const AdminLayout = () => {
                 key={i}
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
-                className={`relative flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${
+                className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                   isActive
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                    : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-100"
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "text-slate-400 hover:bg-white/5 hover:text-slate-100"
                 }`}>
-                {/* Active Indicator Pill */}
-                {isActive && (
-                  <motion.div
-                    layoutId='activeSide'
-                    className='absolute left-[-1rem] w-1.5 h-8 bg-blue-400 rounded-r-full'
-                  />
-                )}
-
                 <span
-                  className={`${isActive ? "text-white" : "text-slate-500 group-hover:text-blue-400"} transition-colors`}>
+                  className={`${isActive ? "text-white" : "text-slate-500 group-hover:text-blue-400"}`}>
                   {item.icon}
                 </span>
-                <span className='text-sm font-bold'>{item.label}</span>
-
-                {isActive && (
-                  <ChevronRight size={14} className='ml-auto opacity-50' />
-                )}
+                <span className='text-[13px] font-bold'>{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* FOOTER ACTION */}
-        <div className='absolute bottom-8 left-0 w-full px-6'>
+        <div className='absolute bottom-6 left-0 w-full px-4'>
           <button
-            className='w-full flex items-center gap-3 px-4 py-4 text-rose-400 hover:bg-rose-500/10 rounded-2xl transition-all font-bold text-sm border border-rose-500/20'
+            className='w-full flex items-center justify-center gap-2 px-4 py-3 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest border border-white/5'
             onClick={handleLogout}>
-            <LogOut size={18} />
-            <span>Sign Out</span>
+            <LogOut size={14} />
+            <span>Logout</span>
           </button>
         </div>
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <div className='flex-1 md:ml-72 min-h-screen flex flex-col'>
-        {/* TOP NAVBAR */}
-        <header className='h-20 bg-white/80 backdrop-blur-md sticky top-0 z-[40] border-b border-slate-100 px-8 flex items-center justify-between'>
+      <div className='flex-1 md:ml-64 flex flex-col h-full overflow-hidden'>
+        {/* TOP NAVBAR - Reduced height from h-24 to h-16/20 */}
+        <header className='h-16 md:h-20 bg-white/80 backdrop-blur-md sticky top-0 z-[40] border-b border-slate-200/60 px-4 md:px-8 flex items-center justify-between'>
           <div className='flex items-center gap-4'>
             <button
               onClick={() => setSidebarOpen(true)}
               className='md:hidden p-2 bg-slate-100 rounded-lg text-slate-600'>
               <Menu size={20} />
             </button>
-            <div className='hidden md:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100'>
-              <div className='w-2 h-2 bg-emerald-500 rounded-full animate-pulse' />
-              <span className='text-[10px] font-black uppercase tracking-widest'>
-                Systems Nominal
-              </span>
+            <div className='hidden lg:flex items-center gap-2 bg-slate-100 px-3 py-2 rounded-xl border border-slate-200/50'>
+              <Search size={16} className='text-slate-400' />
+              <input
+                type='text'
+                placeholder='Quick Search...'
+                className='bg-transparent border-none outline-none text-xs font-medium w-40'
+              />
             </div>
           </div>
 
-          <div className='flex items-center gap-6'>
-            <div className='flex flex-col items-end mr-2'>
-              <span className='text-sm font-black text-slate-800 leading-none'>
-                {user?.name}
-              </span>
-              <span className='text-[10px] font-bold text-blue-500 uppercase mt-1'>
-                Super Administrator
-              </span>
-            </div>
+          <div className='flex items-center gap-3 md:gap-5'>
+            <button className='p-2 text-slate-500 hover:bg-slate-50 rounded-lg'>
+              <Bell size={18} />
+            </button>
 
-            <div className='relative group'>
-              <div className='w-12 h-12 bg-gradient-to-tr from-slate-800 to-slate-700 rounded-2xl flex items-center justify-center text-white font-black shadow-lg shadow-slate-200 cursor-pointer group-hover:rotate-3 transition-transform'>
-                {user?.name?.charAt(0)}
+            <div className='flex items-center gap-3 border-l pl-4 border-slate-200'>
+              <div className='hidden sm:flex flex-col items-end'>
+                <span className='text-xs font-black text-slate-800 leading-none'>
+                  {user?.name || "Admin"}
+                </span>
+                <span className='text-[9px] font-bold text-blue-500 uppercase mt-1'>
+                  Super Admin
+                </span>
               </div>
-              <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full' />
+              <div className='w-9 h-9 md:w-10 md:h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-lg'>
+                {user?.name?.charAt(0) || "A"}
+              </div>
             </div>
           </div>
         </header>
 
-        {/* PAGE CONTENT */}
-        <main className='p-8 flex-1'>
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}>
-            <div className='mb-8 flex items-center gap-3'>
-              <Activity size={20} className='text-blue-500' />
-              <h2 className='text-sm font-black uppercase tracking-[0.3em] text-slate-400'>
-                {location.pathname === "/admin"
-                  ? "Dashboard"
-                  : location.pathname.split("/").pop().replace("-", " ")}
-              </h2>
-            </div>
+        {/* SCROLLABLE PAGE CONTENT */}
+        <main className='flex-1 overflow-y-auto bg-[#F8FAFC] custom-scrollbar'>
+          <div className='p-4 md:p-8 max-w-[1400px] mx-auto w-full'>
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}>
+              {/* Tightened Breadcrumb Section */}
+              <div className='mb-6 flex items-center gap-3'>
+                <div className='p-2 bg-blue-600/10 rounded-lg text-blue-600'>
+                  <Activity size={16} />
+                </div>
+                <div>
+                  <h2 className='text-lg font-black text-slate-800 leading-none'>
+                    {location.pathname === "/admin"
+                      ? "Command Center"
+                      : location.pathname.split("/").pop().replace("-", " ")}
+                  </h2>
+                  <p className='text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1'>
+                    Admin / {location.pathname.split("/").pop()}
+                  </p>
+                </div>
+              </div>
 
-            <Outlet />
-          </motion.div>
+              {/* This is where the specific page content loads */}
+              <Outlet />
+            </motion.div>
+          </div>
         </main>
       </div>
     </div>

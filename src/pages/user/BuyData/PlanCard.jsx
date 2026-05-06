@@ -9,7 +9,7 @@ const PlanCard = ({ plan }) => {
       <div
         onClick={() => setOpen(true)}
         className='bg-white rounded-2xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition'>
-        <h3 className='text-lg font-bold'>{plan.plan_name}</h3>
+        <h3 className='text-lg font-bold'>{plan.data}</h3>
 
         <p className='text-gray-600'>{plan.validity}</p>
 

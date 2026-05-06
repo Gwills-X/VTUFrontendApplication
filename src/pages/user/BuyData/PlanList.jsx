@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import PlanCard from "./PlanCard";
 import api from "../../../api/api";
 
-const PlanList = ({ networkId, category }) => {
+const PlanList = ({ setPlanNumber, networkId, category }) => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,6 +19,7 @@ const PlanList = ({ networkId, category }) => {
         });
 
         setPlans(res.data);
+        setPlanNumber(res.data.length);
         console.log(res.data);
       } catch (error) {
         console.error("Failed to fetch data plans", error);

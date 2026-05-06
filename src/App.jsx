@@ -15,9 +15,12 @@ import BuyData from "./pages/user/BuyData";
 import TransactionsPage from "./pages/user/TransactionsPage";
 import Profile from "./pages/user/Profile";
 import AdminDataPlans from "./pages/admin/pages/AdminDataPlans";
+import AdminCategories from "./pages/admin/AdminCategories";
 
 import ElectricityAdmin from "./pages/admin/ElectricityAdmin";
 import BuyElectricity from "./pages/user/Electricity";
+import AdminCableManager from "./pages/admin/AdminCableManger";
+import AdminProviderManager from "./pages/admin/AdminProviderManager";
 
 const App = () => {
   return (
@@ -46,6 +49,9 @@ const App = () => {
           <Route path='users/:id' element={<UserDetails />} />
           <Route path='services' element={<AdminDataPlans />} />
           <Route path='electricity' element={<ElectricityAdmin />} />
+          <Route path='categories' element={<AdminCategories />} />
+          <Route path='cable-tv' element={<AdminCableManager />} />
+          <Route path='cable/providers' element={<AdminProviderManager />} />
         </Route>
       </Routes>
     </Router>

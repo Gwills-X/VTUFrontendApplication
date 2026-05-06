@@ -9,6 +9,7 @@ import PlanList from "./BuyData/PlanList";
 const BuyData = () => {
   const [networkId, setNetworkId] = useState(null);
   const [category, setCategory] = useState(null);
+  const [planNumber, setPlanNumber] = useState("");
 
   const handlePlanSelect = (plan) => {
     // Logic handled internally by PlanCard
@@ -101,7 +102,7 @@ const BuyData = () => {
                       <div className='hidden md:flex items-center gap-1 text-slate-400'>
                         <Layers size={14} />
                         <span className='text-[10px] font-bold uppercase tracking-tighter'>
-                          {category} Plans
+                          {planNumber} Plans
                         </span>
                       </div>
                     </div>
@@ -110,6 +111,7 @@ const BuyData = () => {
                       <PlanList
                         networkId={networkId}
                         category={category}
+                        setPlanNumber={setPlanNumber}
                         onSelectPlan={handlePlanSelect}
                       />
                     </div>
